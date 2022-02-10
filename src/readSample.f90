@@ -5,20 +5,30 @@ program readSample
 ! The sense of preferLocalConcepts is inverted when encoding.
 !
 
+ USE, intrinsic :: iso_c_binding, only: C_LONG
  USE eccodes
 
  IMPLICIT NONE
 
  INTEGER :: gid,igid,lc,iret,err
- INTEGER :: api_version=0
+ INTEGER(kind=C_LONG) :: api_version=0
  integer :: ilc,olc,ipn,opn,ipid,opid
  integer(kind=kindOfSize)           :: byte_size
  integer             :: ifile,ofile
  character(len=10)   :: isn,osn
  character(len=1), dimension(:), allocatable :: message
 
- CALL codes_get_api_version(api_version,iret)
+ interface
+  function codes_get_api_version_c() bind(C, name='codes_get_api_version')
+    import :: C_LONG
+    integer(kind=C_LONG) :: codes_get_api_version_c
+  end function
+ end interface
+
+ api_version = codes_get_api_version_c()
+
  write(*,*)'Using eccodes version: ',api_version
+ if(api_version < 21800) stop 0
  call codes_open_file(ifile,'sample.grib2', 'r')
  call codes_open_file(ofile,'sample_out.grib2', 'w')
  call codes_grib_new_from_file(ifile,igid, iret)

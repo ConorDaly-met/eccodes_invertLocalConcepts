@@ -25,24 +25,15 @@ mkdir $TMPDIR && cd $TMPDIR
 ECCODESVER=$(codes_info -v)
 echo
 echo "ECCODES VERSION: ${ECCODESVER}"
-ECCODESMAJMINVER=$(echo $ECCODESVER | cut -f1,2 -d. | tr -d '.')
-echo "ECCODES VERSION: ${ECCODESMAJMINVER}"
-
-if [ ${ECCODESMAJMINVER} -lt 218 ]; then
-	echo "ECCODES VERSION: ${ECCODESVER}  -  OK"
-	exit 0
-fi
 echo
 cp ${datadir}/sample.grib2 .
-gfortran $ECCODES_INCLUDE $ECCODES_LIB -o getCodesVersion ${srcdir}/getCodesVersion.f90
-./getCodesVersion
 
 gfortran $ECCODES_INCLUDE $ECCODES_LIB -o readSample ${srcdir}/readSample.f90
 ./readSample
 STATUS=$?
 echo
 ls -l
-grib_ls -p paramId,discipline,parameterCategory,parameterNumber,shortName sample_out.grib2
+[ -f sample_out.grib2 ] && grib_ls -p paramId,discipline,parameterCategory,parameterNumber,shortName sample_out.grib2
 cd - && rm -r $TMPDIR
 if [ $STATUS -eq 0 ]; then
 	echo "ECCODES VERSION: ${ECCODESVER}  -  OK"
